@@ -13,12 +13,12 @@ export const Logo = () => {
         <Link href="/">
             <div className="hover:opacity-75 transition items-center gap-x-2 md:flex">
                 <Image 
-                    src="/atrelator-logo.png"
+                    src="/Logo.svg"
                     alt="Logo"
-                    height={30}
-                    width={30}
+                    height={35}
+                    width={35}
                 />
-                <p className={cn("text-lg text-neutral-700 pb-1", headingFont.className,)}>
+                <p className={cn("text-lg text-neutral-700 pt-1", headingFont.className,)}>
                     Atrelator
                 </p>
             </div>
