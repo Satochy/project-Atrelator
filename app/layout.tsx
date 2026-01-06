@@ -1,32 +1,26 @@
-import type { Metadata } from 'next'
-import { Inter } from 'next/font/google'
-import './globals.css'
-import { siteConfig } from '@/config/site'
-
-const inter = Inter({ subsets: ['latin'] })
-
-export const metadata: Metadata = {
-  title: {
-    default: siteConfig.name,
-    template: `%s | ${siteConfig.name}`, // My-organization | Atrelator
-  },
-  description: siteConfig.description,
-  icons: [
-    {
-      url: "/logo.svg",
-      href: "/logo.svg"
-    }
-  ]
-}
+import { ClerkProvider } from '@clerk/nextjs';
+import './globals.css';
 
 export default function RootLayout({
   children,
 }: {
-  children: React.ReactNode
+  children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
-      <body className={inter.className}>{children}</body>
-    </html>
-  )
+    <ClerkProvider>
+      <html lang="pt-br">
+        <body className="antialiased">
+          {children}
+        </body>
+      </html>
+    </ClerkProvider>
+  );
 }
+
+export const metadata = {
+  title: "Atrelator",
+  description: "Gerencie seus projetos com Atrelator",
+  icons: {
+    icon: "/logo.svg",
+  },
+};
