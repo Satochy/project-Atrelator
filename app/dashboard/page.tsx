@@ -76,7 +76,7 @@ export default function UnifiedDashboardPage() {
   );
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6 lg:p-25">
+    <div className="min-h-screen bg-gray-50 p-5 lg:p-18">
       <div className="max-w-7xl mx-auto">
         
         {/* Cabeçalho */}
@@ -119,7 +119,7 @@ export default function UnifiedDashboardPage() {
           </Card>
           {/* Card att recente */}
           <Card>
-            <CardContent className="p-6 flex items-center justify-between">
+            <CardContent className="p-5 flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-gray-500 uppercase">Atividade Recente</p>
                 <p className="text-2xl font-bold">Hoje</p>
@@ -129,6 +129,14 @@ export default function UnifiedDashboardPage() {
               </div>
             </CardContent>
           </Card>
+        </div>
+
+        {/* Cabeçalho 2 */}
+        <div className="mb-5">
+          <h1 className="text-xl sm:text-3xl font-bold text-gray-900">
+            Seus Quadros:
+          </h1>
+          <p className="text-gray-600">Gerencie seus projetos e tarefas.</p>
         </div>
 
         {/* Barra de Busca e Filtros Estilo */}
