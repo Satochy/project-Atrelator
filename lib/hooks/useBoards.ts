@@ -60,6 +60,7 @@ export const useBoards = (boardId?: string) => {
     const response = await fetch(`/api/boards?id=${id}`, { method: "DELETE" });
     if (!response.ok) throw new Error("Erro ao deletar");
     setBoards((prev) => prev.filter((b) => b.id !== id));
+    if (boardId === id) await fetchBoards();
   };
 
   const createColumn = async (title: string) => {
@@ -74,6 +75,28 @@ export const useBoards = (boardId?: string) => {
       await fetchBoards();
     } catch (error) {
       console.error(error);
+    }
+  };
+
+  const updateColumn = async (id: string, title: string) => {
+    try {
+      const response = await fetch("/api/columns", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id, title }),
+      });
+      if (response.ok) await fetchBoards();
+    } catch (error) {
+      console.error("Erro ao atualizar coluna:", error);
+    }
+  };
+
+  const deleteColumn = async (id: string) => {
+    try {
+      const response = await fetch(`/api/columns?id=${id}`, { method: "DELETE" });
+      if (response.ok) await fetchBoards();
+    } catch (error) {
+      console.error("Erro ao excluir coluna:", error);
     }
   };
 
@@ -95,9 +118,44 @@ export const useBoards = (boardId?: string) => {
     }
   };
 
-  const updateBoard = async (data: any) => { console.log("Update board:", data); };
-  const moveTask = async (taskId: string, targetId: string, idx: number) => { console.log("Move Task no Banco..."); };
-  const updateColumn = async (id: string, title: string) => { console.log("Update col"); };
+  const updateTask = async (id: string, updates: any) => {
+    try {
+      const response = await fetch("/api/tasks", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id, ...updates }),
+      });
+      if (response.ok) await fetchBoards();
+    } catch (error) {
+      console.error("Erro ao atualizar tarefa:", error);
+    }
+  };
+
+  const deleteTask = async (id: string) => {
+    try {
+      const response = await fetch(`/api/tasks?id=${id}`, { method: "DELETE" });
+      if (response.ok) await fetchBoards();
+    } catch (error) {
+      console.error("Erro ao excluir tarefa:", error);
+    }
+  };
+
+  const moveTask = async (taskId: string, targetColumnId: string, newOrder: number) => {
+    try {
+      const response = await fetch("/api/tasks", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ 
+          id: taskId, 
+          columnId: targetColumnId, 
+          order: newOrder 
+        }),
+      });
+      if (response.ok) await fetchBoards();
+    } catch (error) {
+      console.error("Erro ao mover tarefa:", error);
+    }
+  };
 
   return { 
     boards, 
@@ -108,10 +166,12 @@ export const useBoards = (boardId?: string) => {
     deleteBoard, 
     refresh: fetchBoards,
     createColumn, 
-    updateBoard, 
+    updateColumn,
+    deleteColumn,
     createRealTask, 
-    setColumns, 
+    updateTask,
+    deleteTask,
     moveTask,
-    updateColumn 
+    setColumns, 
   };
 };
