@@ -85,7 +85,7 @@ export default function UnifiedDashboardPage() {
             <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
               Bem vindo de volta, {user?.firstName}! 👋
             </h1>
-            <p className="text-gray-600">Gerencie aqui os seus projetos e quadros de trabalho.</p>
+            <p className="text-gray-600">Gerencie e organize os seus projetos aqui.</p>
           </div>
           <Button onClick={handleCreateBoard} className="bg-black hover:bg-white hover:text-black">
             <Plus className="h-4 w-4 mr-2" /> Novo Quadro
@@ -136,7 +136,7 @@ export default function UnifiedDashboardPage() {
           <h1 className="text-xl sm:text-3xl font-bold text-gray-900">
             Seus Quadros:
           </h1>
-          <p className="text-gray-600">Gerencie seus projetos e tarefas.</p>
+          <p className="text-gray-600">Gerencie aqui seus quadros.</p>
         </div>
 
         {/* Barra de Busca e Filtros Estilo */}
