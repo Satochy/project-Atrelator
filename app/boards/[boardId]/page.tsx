@@ -4,7 +4,7 @@ import React, { useState, useEffect, useMemo } from "react";
 import { useUser } from "@clerk/nextjs"; 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Plus, User, Calendar, Filter, ChevronLeft, MoreHorizontal, Trash2, Settings2, CheckCircle2, AlertCircle, Clock, Info, X } from "lucide-react";
+import { Plus, User, Calendar, Filter, ChevronLeft, MoreHorizontal, Trash2, Settings2, CheckCircle2, AlertCircle, Clock, Info, X, PlusCircle } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -238,7 +238,7 @@ export default function BoardPage() {
             onClick={() => router.push("/dashboard")} 
             className="text-gray-500 hover:text-gray-800 transition-colors flex items-center group">
             <ChevronLeft className="h-5 w-5 mr-1" />
-            <span className="text-sm font-medium">Voltar ao dashboard</span>
+            <span className="text-sm font-medium">Voltar ao Dashboard</span>
            </button>
           <div className="h-6 w-px bg-gray-300 mx-3"/>
             <div className="flex items-center space-x-3">
@@ -309,8 +309,8 @@ export default function BoardPage() {
              <span className="text-[12px] text-gray-400 font-extrabold uppercase tracking-widest">
                Tarefas Visíveis: {filteredColumns?.reduce((acc: number, col: any) => acc + (col.tasks?.length || 0), 0)}
              </span>
-             <Button onClick={() => { setListData({id: "", title: ""}); setListDialogMode("create"); setIsListDialogOpen(true); }} className="bg-black hover:bg-gray-800 text-white rounded-xl px-6 h-11 font-bold">
-              <Plus className="h-4 w-4 mr-2" /> Adicionar Lista
+             <Button onClick={() => { setListData({id: "", title: ""}); setListDialogMode("create"); setIsListDialogOpen(true); }} className="bg-black hover:bg-gray-800 text-white rounded-2xl px-8 h-12 font-bold shadow-lg shadow-black/10 transition-all hover:scale-105">
+               <PlusCircle className="h-5 w-5 mr-2" /> Adicionar Lista
              </Button>
           </div>
 
