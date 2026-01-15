@@ -307,7 +307,7 @@ export default function BoardPage() {
         <div className="max-w-[1800px] mx-auto flex flex-col h-full">
           <div className="flex items-center justify-between mb-8">
              <span className="text-[12px] text-gray-400 font-extrabold uppercase tracking-widest">
-               Tarefas Visíveis: {filteredColumns?.reduce((acc: number, col: any) => acc + (col.tasks?.length || 0), 0)}
+               Total de Tarefas: {filteredColumns?.reduce((acc: number, col: any) => acc + (col.tasks?.length || 0), 0)}
              </span>
              <Button onClick={() => { setListData({id: "", title: ""}); setListDialogMode("create"); setIsListDialogOpen(true); }} className="bg-black hover:bg-gray-800 text-white rounded-2xl px-8 h-12 font-bold shadow-lg shadow-black/10 transition-all hover:scale-105">
                <PlusCircle className="h-5 w-5 mr-2" /> Adicionar Lista
