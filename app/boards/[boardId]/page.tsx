@@ -1,13 +1,14 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { useUser } from "@clerk/nextjs"; 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Plus, User, Calendar, Filter, ChevronLeft, MoreHorizontal, Trash2, Settings2, CheckCircle2, AlertCircle, Clock, Info } from "lucide-react";
+import { Plus, User, Calendar, Filter, ChevronLeft, MoreHorizontal, Trash2, Settings2, CheckCircle2, AlertCircle, Clock, Info, X } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useParams, useRouter } from "next/navigation";
 import { DndContext, PointerSensor, useSensor, useSensors, DragEndEvent, DragStartEvent, DragOverlay, closestCorners, defaultDropAnimationSideEffects, useDroppable } from "@dnd-kit/core";
 import { SortableContext, useSortable, verticalListSortingStrategy } from "@dnd-kit/sortable";
@@ -20,6 +21,13 @@ const PRIORITIES = {
   low: { color: "bg-blue-500", label: "Não Urgente", icon: Info },
   medium: { color: "bg-yellow-500", label: "Meio Urgente", icon: Clock },
   high: { color: "bg-red-500", label: "Urgente", icon: AlertCircle },
+};
+
+const INITIAL_FILTERS = {
+  title: "",
+  priority: "all",
+  creator: "",
+  date: ""
 };
 
 function DroppableZone({ id, children }: { id: string, children: React.ReactNode }) {
@@ -118,6 +126,7 @@ function SortableTask({ task, onDelete, onUpdate }: any) {
             </div>
             <div className="space-y-2">
               <label className="text-[12px] font-bold text-gray-400 uppercase ml-1">Descrição</label>
+              <span className="text-xs text-gray-400 ml-1 italic">(Opcional)</span>
               <Textarea value={editData.description} onChange={(e) => setEditData({...editData, description: e.target.value})} className="rounded-xl border-gray-100 min-h-32 resize-none" placeholder="Detalhes da tarefa..." />
             </div>
           </div>
@@ -137,17 +146,45 @@ export default function BoardPage() {
   const [columns, setColumns] = useState<any[]>([]);
   const [activeTask, setActiveTask] = useState<any>(null);
   const [activeColumnId, setActiveColumnId] = useState<string | null>(null);
+  
   const [isCreatingTask, setIsCreatingTask] = useState(false);
   const [newTaskData, setNewTaskData] = useState({ title: "", description: "", priority: "low" });
+  
   const [isListDialogOpen, setIsListDialogOpen] = useState(false);
   const [listDialogMode, setListDialogMode] = useState<"create" | "edit">("create");
   const [listData, setListData] = useState({ id: "", title: "" });
+
+  const [isFilterDialogOpen, setIsFilterDialogOpen] = useState(false);
+  const [filters, setFilters] = useState(INITIAL_FILTERS);
 
   useEffect(() => {
     if (serverColumns) setColumns(serverColumns);
   }, [serverColumns]);
 
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }));
+
+  const filteredColumns = useMemo(() => {
+    return columns.map(column => ({
+      ...column,
+      tasks: column.tasks?.filter((task: any) => {
+        const matchesTitle = task.title.toLowerCase().includes(filters.title.toLowerCase());
+        const matchesPriority = filters.priority === "all" || task.priority === filters.priority;
+        const matchesCreator = task.creatorName?.toLowerCase().includes(filters.creator.toLowerCase());
+        
+        let matchesDate = true;
+        if (filters.date) {
+          const taskDate = new Date(task.createdAt).toISOString().split('T')[0];
+          matchesDate = taskDate === filters.date;
+        }
+
+        return matchesTitle && matchesPriority && matchesCreator && matchesDate;
+      }) || []
+    }));
+  }, [columns, filters]);
+
+  const hasActiveFilters = useMemo(() => {
+    return filters.title !== "" || filters.priority !== "all" || filters.creator !== "" || filters.date !== "";
+  }, [filters]);
 
   const handleUpdateTask = async (taskId: string, updates: any) => {
     try {
@@ -201,7 +238,7 @@ export default function BoardPage() {
             onClick={() => router.push("/dashboard")} 
             className="text-gray-500 hover:text-gray-800 transition-colors flex items-center group">
             <ChevronLeft className="h-5 w-5 mr-1" />
-            <span className="text-ms font-medium">Voltar ao dashboard</span>
+            <span className="text-sm font-medium">Voltar ao dashboard</span>
            </button>
           <div className="h-6 w-px bg-gray-300 mx-3"/>
             <div className="flex items-center space-x-3">
@@ -212,14 +249,66 @@ export default function BoardPage() {
                </div>
             </div>
           </div>
-          <Button variant="outline" className="h-10 text-xs border-gray-100 text-gray-500 font-bold rounded-xl px-4"><Filter className="h-4 w-4 mr-2" /> Filtros</Button>
+
+          <Dialog open={isFilterDialogOpen} onOpenChange={setIsFilterDialogOpen}>
+            <DialogTrigger asChild>
+              <Button variant="outline" className={`h-10 text-xs border-gray-100 font-bold rounded-xl px-4 ${hasActiveFilters ? 'bg-blue-50 text-blue-600 border-blue-200' : 'text-gray-500'}`}>
+                <Filter className="h-4 w-4 mr-2" /> Filtros {hasActiveFilters && "•"}
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-md rounded-3xl p-8 border-none shadow-2xl">
+              <DialogHeader><DialogTitle className="text-xl font-extrabold text-gray-800">Filtrar Tarefas</DialogTitle></DialogHeader>
+              <div className="space-y-4 py-4">
+                <div className="space-y-1">
+                  <label className="text-[10px] font-bold text-gray-400 uppercase ml-1">Título</label>
+                  <Input placeholder="Buscar por nome..." value={filters.title} onChange={(e) => setFilters({...filters, title: e.target.value})} className="rounded-xl" />
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-bold text-gray-400 uppercase ml-1">Prioridade</label>
+                    <Select value={filters.priority} onValueChange={(v) => setFilters({...filters, priority: v})}>
+                      <SelectTrigger className="rounded-xl"><SelectValue placeholder="Todas" /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">Todas</SelectItem>
+                        <SelectItem value="low">Não Urgente</SelectItem>
+                        <SelectItem value="medium">Meio Urgente</SelectItem>
+                        <SelectItem value="high">Urgente</SelectItem>
+                        <SelectItem value="completed">Concluída</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-bold text-gray-400 uppercase ml-1">Criado em</label>
+                    <Input type="date" value={filters.date} onChange={(e) => setFilters({...filters, date: e.target.value})} className="rounded-xl" />
+                  </div>
+                </div>
+                <div className="space-y-1">
+                  <label className="text-[10px] font-bold text-gray-400 uppercase ml-1">Criador</label>
+                  <Input placeholder="Nome do usuário..." value={filters.creator} onChange={(e) => setFilters({...filters, creator: e.target.value})} className="rounded-xl" />
+                </div>
+              </div>
+              <DialogFooter className="flex sm:justify-between items-center gap-2">
+                <Button 
+                  variant="ghost" 
+                  disabled={!hasActiveFilters}
+                  onClick={() => setFilters(INITIAL_FILTERS)}
+                  className="text-red-500 hover:text-red-600 font-bold disabled:opacity-30"
+                >
+                  <X className="h-4 w-4 mr-1" /> Limpar
+                </Button>
+                <Button onClick={() => setIsFilterDialogOpen(false)} className="bg-blue-600 text-white font-bold rounded-xl px-8">Aplicar</Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
         </div>
       </header>
 
       <main className="flex-1 px-10 pt-8 w-full overflow-hidden">
         <div className="max-w-[1800px] mx-auto flex flex-col h-full">
           <div className="flex items-center justify-between mb-8">
-             <span className="text-[12px] text-gray-400 font-extrabold uppercase tracking-widest">Total Tasks: {columns?.reduce((acc: number, col: any) => acc + (col.tasks?.length || 0), 0)}</span>
+             <span className="text-[12px] text-gray-400 font-extrabold uppercase tracking-widest">
+               Tarefas Visíveis: {filteredColumns?.reduce((acc: number, col: any) => acc + (col.tasks?.length || 0), 0)}
+             </span>
              <Button onClick={() => { setListData({id: "", title: ""}); setListDialogMode("create"); setIsListDialogOpen(true); }} className="bg-black hover:bg-gray-800 text-white rounded-xl px-6 h-11 font-bold">
               <Plus className="h-4 w-4 mr-2" /> Adicionar Lista
              </Button>
@@ -227,7 +316,7 @@ export default function BoardPage() {
 
           <DndContext sensors={sensors} collisionDetection={closestCorners} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
             <div className="flex gap-8 overflow-x-auto pb-10 scrollbar-hide items-start h-full">
-              {columns.map((column: any) => (
+              {filteredColumns.map((column: any) => (
                 <div key={column.id} className="w-80 shrink-0 border border-gray-200 rounded-3xl flex flex-col bg-white h-fit shadow-sm">
                   <div className="flex items-center justify-between p-5 pb-3">
                     <div className="flex items-center space-x-3">
