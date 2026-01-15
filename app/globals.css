@@ -93,9 +93,28 @@
 }
 
 @layer base {
+  html, body {
+    user-select: none;
+    -webkit-user-select: none;
+  }
+
+  [role="dialog"], 
+  input, 
+  textarea, 
+  button,
+  .selectable-text {
+    user-select: text !important;
+    -webkit-user-select: text !important;
+  }
+
+  input, textarea {
+    cursor: text;
+  }
+
   * {
     @apply border-border outline-ring/50;
   }
+  
   body {
     @apply bg-background text-foreground antialiased;
     font-feature-settings: "rlig" 1, "calt" 1;

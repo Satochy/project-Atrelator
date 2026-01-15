@@ -426,13 +426,6 @@ export default function BoardPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-
-      <style jsx global>{`
-        .select-none [role="dialog"], .select-none input, .select-none textarea, .select-none button {
-          user-select: text !important;
-          -webkit-user-select: text !important;
-        }
-      `}</style>
     </div>
   );
 }
