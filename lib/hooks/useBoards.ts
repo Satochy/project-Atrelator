@@ -9,10 +9,10 @@ export const useBoards = (boardId?: string) => {
   const [columns, setColumns] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const fetchBoards = useCallback(async () => {
+  const fetchBoards = useCallback(async (isSilent = false) => {
     if (boardId) {
       try {
-        setLoading(true);
+        if (!isSilent) setLoading(true);
         const response = await fetch(`/api/boards?id=${boardId}`);
         if (!response.ok) throw new Error("Falha ao buscar quadro");
         const data = await response.json();
@@ -28,7 +28,7 @@ export const useBoards = (boardId?: string) => {
 
     if (!organization?.id) return;
     try {
-      setLoading(true);
+      if (!isSilent) setLoading(true);
       const response = await fetch("/api/boards");
       if (!response.ok) throw new Error("Falha ao buscar quadros");
       const data = await response.json();
@@ -71,8 +71,7 @@ export const useBoards = (boardId?: string) => {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ title, boardId }),
       });
-      if (!response.ok) throw new Error("Erro ao criar coluna");
-      await fetchBoards();
+      if (response.ok) await fetchBoards(true);
     } catch (error) {
       console.error(error);
     }
@@ -85,7 +84,7 @@ export const useBoards = (boardId?: string) => {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ id, title }),
       });
-      if (response.ok) await fetchBoards();
+      if (response.ok) await fetchBoards(true);
     } catch (error) {
       console.error("Erro ao atualizar coluna:", error);
     }
@@ -93,10 +92,14 @@ export const useBoards = (boardId?: string) => {
 
   const deleteColumn = async (id: string) => {
     try {
+      // Atualização otimista: remove da tela antes mesmo da API responder
+      setColumns((prev) => prev.filter((col) => col.id !== id));
+      
       const response = await fetch(`/api/columns?id=${id}`, { method: "DELETE" });
-      if (response.ok) await fetchBoards();
+      if (!response.ok) await fetchBoards(true); // Se falhar, recarrega do banco
     } catch (error) {
       console.error("Erro ao excluir coluna:", error);
+      await fetchBoards(true);
     }
   };
 
@@ -105,14 +108,9 @@ export const useBoards = (boardId?: string) => {
       const response = await fetch("/api/tasks", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ 
-          title: taskData.title,
-          description: taskData.description,
-          columnId 
-        }),
+        body: JSON.stringify({ ...taskData, columnId }),
       });
-      if (!response.ok) throw new Error("Erro ao criar tarefa");
-      await fetchBoards();
+      if (response.ok) await fetchBoards(true);
     } catch (error) {
       console.error(error);
     }
@@ -125,7 +123,7 @@ export const useBoards = (boardId?: string) => {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ id, ...updates }),
       });
-      if (response.ok) await fetchBoards();
+      if (response.ok) await fetchBoards(true); 
     } catch (error) {
       console.error("Erro ao atualizar tarefa:", error);
     }
@@ -134,7 +132,7 @@ export const useBoards = (boardId?: string) => {
   const deleteTask = async (id: string) => {
     try {
       const response = await fetch(`/api/tasks?id=${id}`, { method: "DELETE" });
-      if (response.ok) await fetchBoards();
+      if (response.ok) await fetchBoards(true);
     } catch (error) {
       console.error("Erro ao excluir tarefa:", error);
     }
@@ -142,36 +140,16 @@ export const useBoards = (boardId?: string) => {
 
   const moveTask = async (taskId: string, targetColumnId: string, newOrder: number) => {
     try {
-      const response = await fetch("/api/tasks", {
+      await fetch("/api/tasks", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ 
-          id: taskId, 
-          columnId: targetColumnId, 
-          order: newOrder 
-        }),
+        body: JSON.stringify({ id: taskId, columnId: targetColumnId, order: newOrder }),
       });
-      if (response.ok) await fetchBoards();
     } catch (error) {
       console.error("Erro ao mover tarefa:", error);
+      fetchBoards(true);
     }
   };
 
-  return { 
-    boards, 
-    board, 
-    columns, 
-    loading, 
-    createBoard, 
-    deleteBoard, 
-    refresh: fetchBoards,
-    createColumn, 
-    updateColumn,
-    deleteColumn,
-    createRealTask, 
-    updateTask,
-    deleteTask,
-    moveTask,
-    setColumns, 
-  };
+  return { boards, board, columns, loading, createBoard, deleteBoard, refresh: fetchBoards, createColumn, updateColumn, deleteColumn, createRealTask, updateTask, deleteTask, moveTask, setColumns };
 };

@@ -47,6 +47,7 @@ model Task {
   description String?  @db.Text
   order       Int      // Para manter a posição das tarefas
   priority    String   @default("medium") // low, medium, high
+  creatorName String?  @default("usuario")
   assignee    String?
   dueDate     DateTime?
 
