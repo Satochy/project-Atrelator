@@ -26,9 +26,7 @@
 
 ## 🚀 Introdução
 
-O **Atrelator** é um sistema de gerenciamento de tarefas de alta performance construído com **Next.js 15**, **Neon Postgres**, **Clerk**, **dnd-kit** e **TailwindCSS v4**. Este projeto implementa fluxos de trabalho profissionais, autenticação segura, persistência de dados serverless e uma interface otimizada com foco em experiência do usuário (UX) e velocidade.
-
-🎥 Visualização do Sistema: [Live Demo](https://atrelator.vercel.app)
+O **Atrelator** é um clone do Trello, ou seja, um sistema de gerenciamento de tarefas de alta performance, construído com **Next.js 15**, **Neon Postgres**, **Clerk**, **dnd-kit** e **TailwindCSS v4**. Este projeto implementa fluxos de trabalho profissionais, autenticação segura, persistência de dados serverless e uma interface otimizada com foco em experiência do usuário (UX) e velocidade.
 
 ---
 
